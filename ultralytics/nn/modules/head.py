@@ -79,7 +79,7 @@ class Detect(nn.Module):
     def forward(self, x):
         """Concatenates and returns predicted bounding boxes and class probabilities."""
         y = self.forward_feat(x, self.cv2, self.cv3)
-        
+
         if self.training:
             return y
 
@@ -507,7 +507,7 @@ class v10Detect(Detect):
 
         self.one2one_cv2 = copy.deepcopy(self.cv2)
         self.one2one_cv3 = copy.deepcopy(self.cv3)
-    
+
     def forward(self, x):
         one2one = self.forward_feat([xi.detach() for xi in x], self.one2one_cv2, self.one2one_cv3)
         if not self.export:
@@ -519,6 +519,7 @@ class v10Detect(Detect):
                 return {"one2many": one2many, "one2one": one2one}
             else:
                 assert(self.max_det != -1)
+                return one2one
                 boxes, scores, labels = ops.v10postprocess(one2one.permute(0, 2, 1), self.max_det, self.nc)
                 return torch.cat([boxes, scores.unsqueeze(-1), labels.unsqueeze(-1).to(boxes.dtype)], dim=-1)
         else:
